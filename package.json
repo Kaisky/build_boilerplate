@@ -1,0 +1,27 @@
+{
+  "name": "build_boilerplate",
+  "version": "1.0.0",
+  "description": "Build procedure boilerplate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kai m",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^6.5.4",
+    "browser-sync": "^2.24.7",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^5.0.0",
+    "gulp-jasmine-browser": "^4.0.0",
+    "gulp-sass": "^4.0.1",
+    "jasmine-core": "^3.2.1",
+    "puppeteer": "^1.9.0",
+    "update": "^0.7.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.1",
+    "eslint-config-google": "^0.10.0",
+    "gulp-autoprefixer": "^6.0.0"
+  }
+}
