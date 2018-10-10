@@ -4,21 +4,38 @@ const autoprefixer = require('gulp-autoprefixer');
 const browserSync = require('browser-sync').create();
 const eslint = require('gulp-eslint');
 const jasmineBrowser = require('gulp-jasmine-browser');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const imagemin = require('gulp-imagemin');
+const babel = require('gulp-babel');
 
-gulp.task('default', ['styles', 'lint'], function() {
-  gulp.watch('sass/**/*.scss', ['styles']);
-  gulp.watch('js/**/*.js', ['lint']);
-  gulp.watch('/build/index.html')
+gulp.task('default', ['styles', 'lint','copy-assets','routes','scripts','scripts-dist'], function() {
+  gulp.watch('src/sass/**/*.scss', ['styles']);
+  gulp.watch('src/js/**/*.js', ['lint','scripts-dist']);
+  gulp.watch('src/index.html',['routes']);
+  gulp.watch('src/assets/**/*',['copy-assets']);
+  gulp.watch(['src/index.html','src/sass/**/*.scss','src/js/**/*.js'])
+    .on('change', browserSync.reload);
 
   browserSync.init({
     server: './dist',
   });
 });
 
+gulp.task('dist', [
+  'routes',
+  'copy-assets',
+  'styles',
+  'lint',
+  'scripts-dist'
+]);
+
 gulp.task('styles', function() {
   gulp
-      .src('sass/**/*.scss')
-      .pipe(sass().on('error', sass.logError))
+      .src('src/sass/**/*.scss')
+      .pipe(sass({
+        outputStyle: 'compressed'
+      }).on('error', sass.logError))
       .pipe(
           autoprefixer({
             browsers: ['last 2 versions'],
@@ -27,6 +44,44 @@ gulp.task('styles', function() {
       .pipe(gulp.dest('./dist/css'))
       .pipe(browserSync.stream());
 });
+
+gulp.task('copy-assets', function() {
+  gulp.src('src/assets/*')
+    .pipe(imagemin([
+      imagemin.gifsicle({interlaced: true}),
+      imagemin.jpegtran({progressive: true}),
+      imagemin.optipng({optimizationLevel: 5}),
+      imagemin.svgo({
+        plugins: [
+          {removeViewBox: true},
+          {cleanupIDs: false}
+        ]
+      })
+    ]))
+    .pipe(gulp.dest('dist/assets'));
+});
+
+gulp.task('routes', function(){
+  gulp.src('src/index.html')
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('scripts', function() {
+  gulp.src('src/js/**/*.js')
+    .pipe(babel())
+    .pipe(concat('main.js'))
+    .pipe(gulp.dest('dist/js'))
+})
+
+gulp.task('scripts-dist', function() {
+  gulp.src('src/js/**/*.js')
+  .pipe(babel({
+    presets: ['@babel/env']
+}))
+  .pipe(concat('main.js'))
+  .pipe(uglify())
+  .pipe(gulp.dest('dist/js'))
+})
 
 gulp.task('lint', function() {
   return (
